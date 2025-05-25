@@ -1,0 +1,21 @@
+arch:
+  decoder:
+    out_features: 3
+    layers: 1
+    layer_size: 32
+  fno:
+    in_channels: 2
+    dimension: 2
+    latent_channels: 32
+    fno_layers: 4
+    fno_modes: 12
+    padding: 9
+scheduler:
+  initial_lr: 0.001
+  decay_rate: 0.9995
+csv_path: ./co2_data.csv
+x_coords:
+- 1.0
+y_coords:
+- 4.0
+source_position: (2.0, 4.0, 3.0, 5.0)

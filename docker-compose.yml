@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: fluid-postgres
+    environment:
+      POSTGRES_USER: xx
+      POSTGRES_PASSWORD: xxpassword
+      POSTGRES_DB: pinn
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis:
+    image: redis
+    container_name: fluid-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: fluid-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: xx
+      RABBITMQ_DEFAULT_PASS: xxpassword
+      RABBITMQ_NODE_IP_ADDRESS: "0.0.0.0"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres-data:

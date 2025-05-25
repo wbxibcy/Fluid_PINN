@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CO2 Data Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 90%;
+        }
+
+        #alertBox {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-weight: bold;
+            z-index: 1000;
+            margin-bottom: 10px;
+        }
+
+        #warningBox {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background-color: #ffe6e6;
+            color: #b71c1c;
+            border: 1px solid #f44336;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(183, 28, 28, 0.4);
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        canvas#co2Chart {
+            display: block;
+            margin: 0 auto;
+            width: 95vw;
+            max-width: 1200px;
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 style="text-align:center;">CO2 Data Chart</h2>
+
+    <div id="alertBox">
+        CO2 较低次数：<span id="lowCount">0</span>&nbsp;&nbsp;&nbsp;&nbsp;
+        CO2 较高次数：<span id="highCount">0</span>
+    </div>
+
+    <div id="warningBox">
+        严重警告(>1000): <span id="warningCount">0</span>
+    </div>
+
+
+    <canvas id="co2Chart"></canvas>
+
+    <script>
+        const timeLabels = {{ data | map(attribute = 'timestamp') | list | tojson }};
+        const co2Values = {{ data | map(attribute = 'co2') | list | tojson }};
+        const thresholdLow = 400;
+        const thresholdHigh = 800;
+        const warningThreshold = 1000;
+
+        const pointColors = [];
+        const pointSizes = [];
+        let lowCount = 0;
+        let highCount = 0;
+        let warningCount = 0;
+
+        co2Values.forEach(value => {
+            if (value > warningThreshold) {
+                pointColors.push('yellow'); // 明黄色
+                pointSizes.push(5); // 大一点显眼点
+                warningCount++;
+            } else if (value < thresholdLow) {
+                pointColors.push('blue');
+                pointSizes.push(2);
+                lowCount++;
+            } else if (value > thresholdHigh) {
+                pointColors.push('orange');
+                pointSizes.push(3);
+                highCount++;
+            } else {
+                pointColors.push('rgba(75, 192, 192, 1)');
+                pointSizes.push(1);
+            }
+        });
+
+        const ctx = document.getElementById('co2Chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'CO2 Level (ppm)',
+                    data: co2Values,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: pointSizes,
+                    pointHoverRadius: pointSizes,
+                    pointBackgroundColor: pointColors,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'CO2 (ppm)'
+                        },
+                        // grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        document.getElementById('lowCount').textContent = lowCount;
+        document.getElementById('highCount').textContent = highCount;
+        document.getElementById('warningCount').textContent = warningCount;
+    </script>
+
+    <div style="width: 80%; margin: 20px auto; display: flex; justify-content: flex-end;">
+        <a href="{{ url_for('table') }}" style="text-decoration: none;">
+            <button style="
+            background-color: rgba(75, 192, 192, 0.3);
+            color: #005757;
+            border: none; 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            box-shadow: 0 2px 6px rgba(75, 192, 192, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        " onmouseover="this.style.backgroundColor='#36a0a0'" onmouseout="this.style.backgroundColor='rgba(75, 192, 192, 0.3)'">
+                查看数据
+                <span style="font-weight: bold; font-size: 18px;">→</span>
+            </button>
+        </a>
+    </div>
+
+</body>
+
+</html>

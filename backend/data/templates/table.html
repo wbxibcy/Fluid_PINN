@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CO2 Data Viewer - Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="text-align: left; margin: 20px;">
+        <a href="{{ url_for('show_data') }}" style="text-decoration: none;">
+            <button style="
+            background-color: rgba(100, 100, 100, 0.15);
+            color: #444444;
+            border: none;
+            padding: 8px 18px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(80, 80, 80, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        " onmouseover="this.style.backgroundColor='rgba(100, 100, 100, 0.35)'; this.style.color='#222222';"
+                onmouseout="this.style.backgroundColor='rgba(100, 100, 100, 0.15)'; this.style.color='#444444';">
+                <span style="font-weight: bold; font-size: 18px;">↩</span>
+            </button>
+        </a>
+    </div>
+
+    <h2 style="text-align:center;">CO2 Data Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>CO2 Level (ppm)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data[-100:][::-1] %}
+            <tr>
+                <td>{{ row.timestamp }}</td>
+                <td style="
+                    color:
+                    {% if row.co2 > 1000 %}
+                        #FF0000;
+                    {% elif row.co2 < 400 or row.co2 > 800 %}
+                        #8B0000;
+                    {% else %}
+                        inherit;
+                    {% endif %}
+                ">
+                    {{ row.co2 | int }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
